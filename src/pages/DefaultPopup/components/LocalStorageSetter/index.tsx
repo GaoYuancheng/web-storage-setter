@@ -17,7 +17,11 @@ import {
   CHROME_STORAGE_OPTION_KEY,
   DEFAULT_SELECT_KEYS,
 } from "@/constants";
-import { DownOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  CopyOutlined,
+  DownOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import classnames from "classnames";
 import {
   getKeysInObj,
@@ -216,7 +220,7 @@ const LocalStorageSetter = () => {
                 修复root样式
               </ConfigCheckbox>
             </div>
-            <div>
+            <div style={{ marginTop: 4 }}>
               <Button
                 type="primary"
                 size="small"
@@ -225,6 +229,25 @@ const LocalStorageSetter = () => {
                 }}
               >
                 复制 set 方法
+              </Button>
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => {
+                  const res = selectLSKeys.reduce(
+                    (acc: Record<string, string>, cur: string) => {
+                      acc[cur] = curLS[cur];
+                      return acc;
+                    },
+                    {}
+                  );
+                  copyToClipboard(JSON.stringify(res));
+                  message.success("复制成功");
+                }}
+              >
+                以 JSON 格式复制
               </Button>
             </div>
           </>
@@ -317,7 +340,7 @@ const LocalStorageSetter = () => {
         </div>
       </div>
       <div>
-        <div>
+        <div className={styles.keySelectArea}>
           <span className={styles.label}>可用key</span>
           <QuestionCircleOutlined
             className={styles.keySelectTipIcon}
@@ -343,11 +366,25 @@ const LocalStorageSetter = () => {
             <Row>
               {localStorageKeysList.map((key) => (
                 <Col span={8} key={key}>
-                  <Checkbox value={key}>
-                    <span className={styles.checkBoxLabel} title={key}>
-                      {key}
-                    </span>
-                  </Checkbox>
+                  <div className={styles.checkboxWrapper}>
+                    <Checkbox value={key}>
+                      <span className={styles.checkBoxLabel} title={key}>
+                        <span className={styles.keyText}>{key}</span>
+                        <Button 
+                          type="text" 
+                          size="small" 
+                          icon={<CopyOutlined />} 
+                          onClick={(e) => {
+                            e.stopPropagation(); // 防止触发选择事件
+                            navigator.clipboard.writeText(curLS[key]);
+                            message.success(`已复制 ${key}`);
+                          }}
+                          title="复制为JSON"
+                          className={styles.copyButton}
+                        />
+                      </span>
+                    </Checkbox>
+                  </div>
                 </Col>
               ))}
             </Row>
