@@ -29,7 +29,6 @@ const ConfigCheckbox: React.FC<Props> = ({ name, children }) => {
     if (!currentTab?.id || !currentLocalStorage) return;
 
     const wssConfig = JSON.parse(currentLocalStorage[WSS_CONFIG] || "{}");
-    console.log("wssConfig", wssConfig);
     const { [name]: target } = wssConfig;
     wssConfigRef.current = wssConfig;
     setChecked(!!target);

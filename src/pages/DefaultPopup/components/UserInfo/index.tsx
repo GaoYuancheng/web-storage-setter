@@ -1,9 +1,9 @@
-import React, { useEffect, useContext, useState, CSSProperties } from "react";
+import React, { useContext, CSSProperties } from "react";
 import Styles from "./index.module.less";
 import classnames from "classnames";
 import { GlobalContext } from "@/models/useGlobalContext";
-import { getLocalStorageFunc } from "@/utils";
 import { Tooltip } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
 
 interface Props {
   className?: string;
@@ -78,25 +78,10 @@ const typeMap: Record<
 };
 
 const UserInfo: React.FC<Props> = ({ className = "", ...rest }) => {
-  const { currentTab } = useContext(GlobalContext);
-  const [userInfo, setUserInfo] = useState<any>({});
+  const { currentLocalStorage = {} } = useContext(GlobalContext);
+  const { currentUser = "{}" } = currentLocalStorage;
 
-  const getUserInfo = async () => {
-    if (!currentTab?.id) {
-      return;
-    }
-    const [
-      {
-        result: { data },
-      },
-    ] = await chrome.scripting.executeScript({
-      target: { tabId: currentTab.id },
-      func: getLocalStorageFunc,
-    });
-
-    const { currentUser = "{}" } = data;
-    setUserInfo(JSON.parse(currentUser));
-  };
+  const userInfo = JSON.parse(currentUser);
 
   const infoItemRender = (item: InfoItem) => {
     const { classNames = [], style = {} } = item;
@@ -115,18 +100,10 @@ const UserInfo: React.FC<Props> = ({ className = "", ...rest }) => {
     );
   };
 
-  useEffect(() => {
-    // const
-    // 状态管理 加一个当前tab的状态管理
-    if (!currentTab) {
-      return;
-    }
-    getUserInfo();
-  }, [currentTab]);
-
   const isEmpty = JSON.stringify(userInfo) === "{}";
-  const { type } = userInfo || {};
-  const targetTypeInfo = typeMap[type as keyof typeof typeMap] || {};
+  const { type, currentDepartmentId } = userInfo || {};
+  const resType = currentDepartmentId ? 3 : type;
+  const targetTypeInfo = typeMap[resType as keyof typeof typeMap] || {};
 
   return (
     <div className={classnames(Styles.userInfo, className)} {...rest}>
@@ -145,6 +122,19 @@ const UserInfo: React.FC<Props> = ({ className = "", ...rest }) => {
             </div>
           </Tooltip>
           {(targetTypeInfo?.infoList || []).map(infoItemRender)}
+          <Tooltip
+            getTooltipContainer={(node) => node?.parentNode as HTMLElement}
+            placement="bottomLeft"
+            title={
+              <pre className={Styles.userInfoJson}>
+                {JSON.stringify(userInfo, null, 2)}
+              </pre>
+            }
+          >
+            <div className={classnames(Styles.infoItem, Styles.userInfo)}>
+              <InfoCircleOutlined />
+            </div>
+          </Tooltip>
         </>
       )}
     </div>

@@ -3,7 +3,7 @@ import { getCurrentTab, getLocalStorageFunc } from "@/utils";
 
 interface Store {
   currentTab?: chrome.tabs.Tab;
-  currentLocalStorage?: Window["localStorage"] & {
+  currentLocalStorage?: Record<string, string> & {
     WSS_CONFIG?: string;
   };
 }
@@ -22,8 +22,7 @@ const GlobalContext = createContext<ContextValue>({
 const GlobalContextProvider: React.FC = ({ children }) => {
   const [store, setStore] = useState<Store>({});
 
-  // 获取当前tab的localStorage]
-  // TODO: 后续考虑是否拆分到 localStorage组件中
+  // 获取当前tab的localStorage
   const getLocal = async (currentTab: Store["currentTab"]) => {
     if (!currentTab?.id) return;
     const [
@@ -40,8 +39,15 @@ const GlobalContextProvider: React.FC = ({ children }) => {
 
   const init = async () => {
     const tab = await getCurrentTab();
+    setStore({ ...store, currentTab: tab });
+
+    // 获取 local 需要页面加载完 延后获取 保证页面先渲染 不然会卡主
     const data = await getLocal(tab);
-    setStore({ currentTab: tab, currentLocalStorage: data });
+    setStore({
+      // 这里不能使用 ...store 获取不到tab
+      currentTab: tab,
+      currentLocalStorage: data,
+    });
   };
 
   useEffect(() => {

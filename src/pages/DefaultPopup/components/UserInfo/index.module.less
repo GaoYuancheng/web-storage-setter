@@ -27,5 +27,25 @@
     &.coPjSubId {
       flex-basis: 60px;
     }
+
+    // userInfo
+    &.userInfo {
+      flex-basis: 10px;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .userInfoJson {
+    overflow: auto;
+    max-height: 270px;
+    &:global {
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      &::-webkit-scrollbar-corner {
+        display: none;
+      }
+    }
   }
 }

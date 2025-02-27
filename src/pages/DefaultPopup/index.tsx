@@ -8,6 +8,7 @@ import { GlobalContextProvider } from "@/models/useGlobalContext";
 import VersionInfo from "./components/VersionInfo";
 import ReactDOM from "react-dom";
 import { ExclamationCircleOutlined, SettingOutlined } from "@ant-design/icons";
+import IndexDBSetter from "./components/IndexDBSetter";
 
 const tabList = [
   {
@@ -20,6 +21,11 @@ const tabList = [
     key: "Cookie",
     children: <CookieSetter />,
   },
+  // {
+  //   label: `IndexDB`,
+  //   key: "IndexDB",
+  //   children: <IndexDBSetter />,
+  // },
 ];
 
 const DefaultPopup: React.FC = () => {
