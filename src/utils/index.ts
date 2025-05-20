@@ -66,3 +66,19 @@ export const templateForSetLocalStorage = `(() => {
       window.localStorage.setItem(key, params[key]);
     });
   })()`;
+
+// 根据url获取域名
+export const getDomainFromUrl = (url: string) => {
+  const domain = url.split("/")[2];
+  return domain;
+};
+
+// 使用 document.execCommand 获取剪切板内容
+export const getClipboardContent = async () => {
+  try {
+    const res = await navigator.clipboard.readText();
+    return res;
+  } catch (err) {
+    console.log(err);
+  }
+};

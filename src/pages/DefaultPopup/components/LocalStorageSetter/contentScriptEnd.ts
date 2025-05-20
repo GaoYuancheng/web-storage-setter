@@ -19,7 +19,11 @@ const fixPmsRootStyleFunc = () => {
 const hiddenGrayAsideFunc = () => {
   // 初始化时获取不到dom 先暂时写样式
   var style = document.createElement("style");
-  style.innerHTML = ".gray-test-aside{ display: none }";
+  style.innerHTML = `
+    .gray-test-aside{ display: none }
+    .panshi-tool{ display: none }
+  `;
+
   document?.getElementsByTagName("head")?.item(0)?.appendChild(style);
   console.log("隐藏灰度侧边栏成功！----------");
 };

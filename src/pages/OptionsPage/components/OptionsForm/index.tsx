@@ -67,11 +67,16 @@ const OptionsFormWrapper: React.FC<Props> = ({ optionKey, options }) => {
   }, []);
 
   return (
-    <Form form={form} onValuesChange={onValuesChange}>
+    <Form layout="inline" form={form} onValuesChange={onValuesChange}>
       {options.map((item) => {
         const { formItemProps = {} } = item;
         return (
-          <Form.Item name={item.name} label={item.label} {...formItemProps}>
+          <Form.Item
+            name={item.name}
+            key={item.name}
+            label={item.label}
+            {...formItemProps}
+          >
             {renderFormItemContent(item)}
           </Form.Item>
         );

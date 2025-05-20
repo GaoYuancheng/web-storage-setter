@@ -28,6 +28,8 @@ import {
   templateForSetLocalStorage,
   copyToClipboard,
   setLocalStorageFunc,
+  getClipboardContent,
+  getDomainFromUrl,
 } from "@/utils";
 import { GlobalContext } from "@/models/useGlobalContext";
 import ConfigCheckbox from "./components/ConfigCheckbox";
@@ -55,7 +57,7 @@ const LocalStorageSetter = () => {
   const { defaultSelectAll = false } = currentOptionsRef.current;
   // const currentTabRef = useRef<chrome.tabs.Tab | undefined>();
 
-  const { value: curLS = {} } = domainList[selectedDomainIndex] || {};
+  const { value: curLS = {}, domain } = domainList[selectedDomainIndex] || {};
 
   const localStorageKeysList = Object.keys(curLS).sort(
     (a: any, b: any) => a - b
@@ -183,6 +185,27 @@ const LocalStorageSetter = () => {
     message.success("复制成功");
   };
 
+  // 修改curl域名
+  const modifyCurlDomain = async () => {
+    console.log(domainList[selectedDomainIndex] || {});
+
+    if (!domain) return;
+    const clipboardContent = (await getClipboardContent()) || "";
+    const clipboardDomain = getDomainFromUrl(clipboardContent);
+    const resDomain = getDomainFromUrl(domain);
+    console.log(" modifyCurlDomain ~ resDomain:", {
+      clipboardContent,
+      clipboardDomain,
+      resDomain,
+    });
+    const newClipboardContent = clipboardContent.replace(
+      clipboardDomain,
+      resDomain
+    );
+    navigator.clipboard.writeText(newClipboardContent);
+    message.success("操作成功");
+  };
+
   useEffect(() => {
     if (!currentTab) return;
     init();
@@ -213,49 +236,50 @@ const LocalStorageSetter = () => {
         placement="bottomRight"
         arrow={false}
         content={
-          <>
-            <div>
-              <ConfigCheckbox name="skipPmsLogin">跳过登录</ConfigCheckbox>
-            </div>
+          <Space direction="vertical" size={4}>
+            <ConfigCheckbox name="skipPmsLogin">跳过登录</ConfigCheckbox>
             {/* <div>
               <ConfigCheckbox name="fixPmsRootStyle">
                 修复root样式
               </ConfigCheckbox>
             </div> */}
-            <div>
-              <ConfigCheckbox name="hiddenGrayAside">隐藏灰度</ConfigCheckbox>
-            </div>
-            <div style={{ marginTop: 4 }}>
-              <Button
-                type="primary"
-                size="small"
-                onClick={() => {
-                  copyForSetLS();
-                }}
-              >
-                复制 set 方法
-              </Button>
-            </div>
-            <div style={{ marginTop: 4 }}>
-              <Button
-                type="primary"
-                size="small"
-                onClick={() => {
-                  const res = selectLSKeys.reduce(
-                    (acc: Record<string, string>, cur: string) => {
-                      acc[cur] = curLS[cur];
-                      return acc;
-                    },
-                    {}
-                  );
-                  copyToClipboard(JSON.stringify(res));
-                  message.success("复制成功");
-                }}
-              >
-                以 JSON 格式复制
-              </Button>
-            </div>
-          </>
+            <ConfigCheckbox name="hiddenGrayAside">隐藏灰度</ConfigCheckbox>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                copyForSetLS();
+              }}
+            >
+              复制 set 方法
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                const res = selectLSKeys.reduce(
+                  (acc: Record<string, string>, cur: string) => {
+                    acc[cur] = curLS[cur];
+                    return acc;
+                  },
+                  {}
+                );
+                copyToClipboard(JSON.stringify(res));
+                message.success("复制成功");
+              }}
+            >
+              以 JSON 格式复制
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                modifyCurlDomain();
+              }}
+            >
+              修改curl域名
+            </Button>
+          </Space>
         }
       >
         <Button size="small" type="primary">
@@ -375,10 +399,10 @@ const LocalStorageSetter = () => {
                     <Checkbox value={key}>
                       <span className={styles.checkBoxLabel} title={key}>
                         <span className={styles.keyText}>{key}</span>
-                        <Button 
-                          type="text" 
-                          size="small" 
-                          icon={<CopyOutlined />} 
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<CopyOutlined />}
                           onClick={(e) => {
                             e.stopPropagation(); // 防止触发选择事件
                             navigator.clipboard.writeText(curLS[key]);

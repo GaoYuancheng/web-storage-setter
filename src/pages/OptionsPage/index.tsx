@@ -41,7 +41,8 @@ const tabsList = [
 
 const OptionsPage = () => {
   const init = async () => {
-    chrome.storage.local.get(CHROME_STORAGE_OPTION_KEY).then(console.log);
+    const res = await chrome.storage.local.get(CHROME_STORAGE_OPTION_KEY);
+    console.log(res);
   };
 
   useEffect(() => {
