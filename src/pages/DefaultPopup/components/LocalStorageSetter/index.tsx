@@ -205,7 +205,7 @@ const LocalStorageSetter = () => {
 
   // 获取移动端data
   const getH5DataFromLS = async () => {
-    const res = genH5Data(curLS);
+    const res = genH5Data(currentLocalStorage);
     if (!res) return;
     navigator.clipboard.writeText(res);
     message.success("操作成功");

@@ -46,12 +46,18 @@ export const genH5Data = (
     departmentId,
   } = JSON.parse(currentUser || "{}") || {};
 
+  const orgName = pjName || subCoName || coName;
+
   const dataObj = {
     user: JSON.stringify({
       accessToken,
       refreshToken,
       pjName: encodeURIComponent(pjName),
       coName: encodeURIComponent(coName),
+      pjId,
+      currentDepartmentId,
+      name: encodeURIComponent(orgName),
+      coId,
     }),
     companyId: coId,
     projectId: pjId,
