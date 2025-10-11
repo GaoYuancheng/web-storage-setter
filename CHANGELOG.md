@@ -66,3 +66,7 @@
 
 - 新增 多选后以 JSON 格式复制
 - 新增 单个 LocalStorage 复制
+
+### v0.0.13
+
+- 新增 转换当前 LocalStorage 为 移动端 data

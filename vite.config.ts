@@ -31,9 +31,6 @@ export default defineConfig({
     port: 4000,
   },
   base: "./",
-  define: {
-    __DIRNAME: JSON.stringify(__dirname),
-  },
   css: {
     preprocessorOptions: {
       // 支持less

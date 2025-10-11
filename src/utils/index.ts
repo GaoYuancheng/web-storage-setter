@@ -1,3 +1,5 @@
+export * from "./parse";
+
 // 格式化cookies
 export const formatCookieToString = (cookies: any[]) => {
   let cookieString = "";

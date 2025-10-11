@@ -30,6 +30,7 @@ import {
   setLocalStorageFunc,
   getClipboardContent,
   getDomainFromUrl,
+  genH5Data,
 } from "@/utils";
 import { GlobalContext } from "@/models/useGlobalContext";
 import ConfigCheckbox from "./components/ConfigCheckbox";
@@ -193,16 +194,20 @@ const LocalStorageSetter = () => {
     const clipboardContent = (await getClipboardContent()) || "";
     const clipboardDomain = getDomainFromUrl(clipboardContent);
     const resDomain = getDomainFromUrl(domain);
-    console.log(" modifyCurlDomain ~ resDomain:", {
-      clipboardContent,
-      clipboardDomain,
-      resDomain,
-    });
+
     const newClipboardContent = clipboardContent.replace(
       clipboardDomain,
       resDomain
     );
     navigator.clipboard.writeText(newClipboardContent);
+    message.success("操作成功");
+  };
+
+  // 获取移动端data
+  const getH5DataFromLS = async () => {
+    const res = genH5Data(curLS);
+    if (!res) return;
+    navigator.clipboard.writeText(res);
     message.success("操作成功");
   };
 
@@ -278,6 +283,15 @@ const LocalStorageSetter = () => {
               }}
             >
               修改curl域名
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                getH5DataFromLS();
+              }}
+            >
+              获取移动端data
             </Button>
           </Space>
         }
