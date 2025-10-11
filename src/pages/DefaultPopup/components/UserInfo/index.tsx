@@ -78,7 +78,7 @@ const getUserOrgInfo = (curLS: any, type: EnvType): UserOrgInfo | undefined => {
     const { data: projectId } = JSON.parse(PROJECTID || "{}");
     const { data: companyId } = JSON.parse(COMPANYID || "{}");
 
-    const { mName } = user;
+    const { mName } = user || {};
 
     const commonUserInfo = {
       userName: mName,
