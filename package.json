@@ -3,7 +3,7 @@
   "version": "0.0.13",
   "author": "gyc",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite build --watch",
     "watch": "vite build --watch",
     "build": "vite build",
     "serve": "vite preview"

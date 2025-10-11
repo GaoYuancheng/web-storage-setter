@@ -34,7 +34,6 @@ import {
 } from "@/utils";
 import { GlobalContext } from "@/models/useGlobalContext";
 import ConfigCheckbox from "./components/ConfigCheckbox";
-import UserInfoLine from "./components/UserInfoLine";
 
 interface DomianListItem {
   updateTime?: number;
@@ -358,17 +357,6 @@ const LocalStorageSetter = () => {
               {domainList.map((item, index) => (
                 <Radio value={index} key={item.updateTime}>
                   <div className={styles.domainsItem}>
-                    {/* <Tooltip
-                      title={
-                        <UserInfoLine
-                          userInfo={domainList[index].value.currentUser}
-                        />
-                      }
-                    >
-                      <div className={styles.domian} title={item.domain}>
-                        {item.domain}
-                      </div>
-                    </Tooltip> */}
                     <div className={styles.domian} title={item.domain}>
                       {item.domain}
                     </div>

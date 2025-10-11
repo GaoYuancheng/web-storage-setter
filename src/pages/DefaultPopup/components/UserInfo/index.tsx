@@ -1,142 +1,188 @@
-import React, { useContext, CSSProperties } from "react";
+import React, { useContext, CSSProperties, useState } from "react";
 import Styles from "./index.module.less";
 import classnames from "classnames";
 import { GlobalContext } from "@/models/useGlobalContext";
 import { Tooltip } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined, SwapOutlined } from "@ant-design/icons";
 
 interface Props {
   className?: string;
 }
 
-interface InfoItem {
-  label: string;
-  key: string;
-  classNames?: string[];
-  // toolTip?: boolean;
-  style?: CSSProperties;
+type EnvType = "web" | "mobile";
+
+interface UserOrgInfo {
+  userName: string;
+  orgLevel: string;
+  orgName: string;
+  orgId: string;
 }
 
-const typeMap: Record<
-  string,
-  {
-    label: string;
-    infoList?: InfoItem[];
+const getUserOrgInfo = (curLS: any, type: EnvType): UserOrgInfo | undefined => {
+  if (type === "web") {
+    const { currentUser = "{}" } = curLS;
+    const userInfo = JSON.parse(currentUser);
+    const {
+      currentDepartmentId,
+      subCoName,
+      pjId,
+      pjName,
+      coId,
+      coName,
+      userName,
+    } = userInfo;
+    const commonUserInfo = {
+      userName: userName,
+    };
+    // web 项目级
+    if (pjId) {
+      return {
+        ...commonUserInfo,
+        orgLevel: "项目级",
+        orgName: pjName,
+        orgId: pjId,
+      };
+    }
+    // web 子公司级
+    if (currentDepartmentId) {
+      return {
+        ...commonUserInfo,
+        orgLevel: "子公司级",
+        orgName: subCoName,
+        orgId: currentDepartmentId,
+      };
+    }
+
+    if (coId) {
+      return {
+        ...commonUserInfo,
+        orgLevel: "企业级",
+        orgName: coName,
+        orgId: coId,
+      };
+    }
   }
-> = {
-  1: {
-    label: "企业级",
-    infoList: [
-      {
-        label: "coName",
-        key: "coName",
-        classNames: [Styles.coPjSubName],
-      },
-      {
-        label: "coId",
-        key: "coId",
-        classNames: [Styles.coPjSubId],
-      },
-    ],
-  },
-  2: {
-    label: "项目级",
-    infoList: [
-      {
-        label: "pjName",
-        key: "pjName",
-        classNames: [Styles.coPjSubName],
-      },
-      {
-        label: "pjId",
-        key: "pjId",
-        classNames: [Styles.coPjSubId],
-      },
-    ],
-  },
-  3: {
-    label: "子公司级",
-    infoList: [
-      {
-        label: "subCoName",
-        key: "subCoName",
-        classNames: [Styles.coPjSubName],
-      },
-      {
-        label: "currentDepartmentId",
-        key: "currentDepartmentId",
-        classNames: [Styles.coPjSubId],
-      },
-    ],
-  },
-  4: {
-    label: "个人",
-  },
-  5: {
-    label: "obs",
-  },
+
+  if (type === "mobile") {
+    const {
+      USER = "{}",
+      DEPARTID = "{}",
+      PROJECTID = "{}",
+      COMPANYID = "{}",
+      COMPANYNAME,
+      DEPARTNAME,
+      PROJECTNAME,
+    } = curLS;
+    const { data: user } = JSON.parse(USER || "{}");
+    const { data: departId } = JSON.parse(DEPARTID || "{}");
+    const { data: projectId } = JSON.parse(PROJECTID || "{}");
+    const { data: companyId } = JSON.parse(COMPANYID || "{}");
+
+    const { mName } = user;
+
+    const commonUserInfo = {
+      userName: mName,
+    };
+
+    if (projectId) {
+      return {
+        ...commonUserInfo,
+        orgLevel: "项目级",
+        orgName: PROJECTNAME,
+        orgId: projectId,
+      };
+    }
+
+    if (departId) {
+      return {
+        ...commonUserInfo,
+        orgLevel: "子公司级",
+        orgName: DEPARTNAME,
+        orgId: departId,
+      };
+    }
+
+    if (companyId) {
+      return {
+        ...commonUserInfo,
+        orgLevel: "企业级",
+        orgName: COMPANYNAME,
+        orgId: companyId,
+      };
+    }
+  }
+
+  return undefined;
 };
 
 const UserInfo: React.FC<Props> = ({ className = "", ...rest }) => {
+  const [envType, setEnvType] = useState<EnvType>("web");
   const { currentLocalStorage = {} } = useContext(GlobalContext);
   const { currentUser = "{}" } = currentLocalStorage;
 
-  const userInfo = JSON.parse(currentUser);
-
-  const infoItemRender = (item: InfoItem) => {
-    const { classNames = [], style = {} } = item;
-    const childDom = (
-      <div className={classnames(Styles.infoItem, classNames)} style={style}>
-        {userInfo[item.key]}
-      </div>
-    );
-    return (
-      <>
-        {/* <Divider type="vertical" /> */}
-        <Tooltip title={`${item.label}：${userInfo[item.key]}`} key={item.key}>
-          {childDom}
-        </Tooltip>
-      </>
-    );
-  };
-
-  const isEmpty = JSON.stringify(userInfo) === "{}";
-  const { type, currentDepartmentId } = userInfo || {};
-  const resType = currentDepartmentId ? 3 : type;
-  const targetTypeInfo = typeMap[resType as keyof typeof typeMap] || {};
+  const userOrgInfo = getUserOrgInfo(currentLocalStorage, envType);
+  const isEmpty = !userOrgInfo;
+  const { userName, orgLevel, orgName, orgId } = userOrgInfo || {};
+  console.log("🚀 ~ UserInfo ~ userOrgInfo:", userOrgInfo);
 
   return (
     <div className={classnames(Styles.userInfo, className)} {...rest}>
-      {isEmpty && "暂无用户信息"}
-      {!isEmpty && (
-        <>
-          <Tooltip title={`用户名：${userInfo?.userName}`}>
-            <div className={classnames(Styles.infoItem, Styles.userName)}>
-              {userInfo?.userName}
-            </div>
-          </Tooltip>
-          {/* <Divider type="vertical" /> */}
-          <Tooltip title={`层级：${targetTypeInfo?.label}`}>
-            <div className={classnames(Styles.infoItem, Styles.userLevel)}>
-              {targetTypeInfo?.label}
-            </div>
-          </Tooltip>
-          {(targetTypeInfo?.infoList || []).map(infoItemRender)}
-          <Tooltip
-            getTooltipContainer={(node) => node?.parentNode as HTMLElement}
-            placement="bottomLeft"
-            title={
-              <pre className={Styles.userInfoJson}>
-                {JSON.stringify(userInfo, null, 2)}
-              </pre>
-            }
-          >
-            <div className={classnames(Styles.infoItem, Styles.userInfo)}>
-              <InfoCircleOutlined />
-            </div>
-          </Tooltip>
-        </>
-      )}
+      <div className={Styles.infoContent}>
+        {isEmpty ? (
+          <div className={Styles.infoItem}>暂无用户信息</div>
+        ) : (
+          <>
+            <Tooltip title={`用户名：${userName}`}>
+              <div className={classnames(Styles.infoItem, Styles.userName)}>
+                {userName}
+              </div>
+            </Tooltip>
+            <Tooltip title={`层级：${orgLevel}`}>
+              <div className={classnames(Styles.infoItem, Styles.userLevel)}>
+                {orgLevel}
+              </div>
+            </Tooltip>
+            <Tooltip title={`组织名称：${orgName}`}>
+              <div className={classnames(Styles.infoItem, Styles.orgName)}>
+                {orgName}
+              </div>
+            </Tooltip>
+            <Tooltip title={`组织ID：${orgId}`}>
+              <div className={classnames(Styles.infoItem, Styles.orgId)}>
+                {orgId}
+              </div>
+            </Tooltip>
+          </>
+        )}
+      </div>
+      <div className={Styles.infoExtra}>
+        <Tooltip
+          getTooltipContainer={(node) => node?.parentNode as HTMLElement}
+          placement="bottomLeft"
+          title={
+            <pre className={Styles.userInfoJson}>
+              {JSON.stringify(JSON.parse(currentUser || "{}"), null, 2)}
+            </pre>
+          }
+        >
+          <div className={classnames(Styles.infoItem)}>
+            <InfoCircleOutlined />
+          </div>
+        </Tooltip>
+        <Tooltip
+          getTooltipContainer={(node) => node?.parentNode as HTMLElement}
+          placement="bottomLeft"
+          title={`当前为 ${envType === "web" ? "web" : "mobile"} 信息 点击切换`}
+        >
+          <div className={classnames(Styles.infoItem)}>
+            <SwapOutlined
+              onClick={() =>
+                setEnvType((prev) => (prev === "web" ? "mobile" : "web"))
+              }
+            />
+          </div>
+        </Tooltip>
+      </div>
     </div>
   );
 };

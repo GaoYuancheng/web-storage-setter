@@ -44,6 +44,7 @@ export const genH5Data = (
     coName,
     currentDepartmentId,
     departmentId,
+    userName,
   } = JSON.parse(currentUser || "{}") || {};
 
   const orgName = pjName || subCoName || coName;
@@ -58,6 +59,7 @@ export const genH5Data = (
       currentDepartmentId,
       name: encodeURIComponent(orgName),
       coId,
+      mName: userName,
     }),
     companyId: coId,
     projectId: pjId,

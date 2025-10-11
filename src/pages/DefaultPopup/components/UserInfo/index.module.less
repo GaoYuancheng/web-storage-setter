@@ -1,51 +1,52 @@
 .userInfo {
   padding: 8px 0 0;
   display: flex;
+  justify-content: space-between;
 
   .infoItem {
     padding: 4px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+  }
+  .infoContent {
+    display: flex;
+    flex: 1;
 
+    // 420
     // 用户名
-    &.userName {
+    .userName {
       flex-basis: 50px;
     }
     // 层级
-    &.userLevel {
+    .userLevel {
       flex-basis: 70px;
     }
 
-    // 项目名称
-    &.coPjSubName {
-      // flex-basis: 60px;
-      width: 230px;
+    .orgName {
+      flex-basis: 210px;
     }
 
-    // id
-    &.coPjSubId {
+    .orgId {
       flex-basis: 60px;
     }
 
-    // userInfo
-    &.userInfo {
-      flex-basis: 10px;
-      display: flex;
-      align-items: center;
+    .userInfoJson {
+      overflow: auto;
+      max-height: 270px;
+      &:global {
+        &::-webkit-scrollbar {
+          display: none;
+        }
+        &::-webkit-scrollbar-corner {
+          display: none;
+        }
+      }
     }
   }
 
-  .userInfoJson {
-    overflow: auto;
-    max-height: 270px;
-    &:global {
-      &::-webkit-scrollbar {
-        display: none;
-      }
-      &::-webkit-scrollbar-corner {
-        display: none;
-      }
-    }
+  .infoExtra {
+    display: flex;
+    // width: 36px;
   }
 }
