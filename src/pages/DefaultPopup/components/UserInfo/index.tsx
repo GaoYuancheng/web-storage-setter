@@ -123,7 +123,6 @@ const UserInfo: React.FC<Props> = ({ className = "", ...rest }) => {
   const userOrgInfo = getUserOrgInfo(currentLocalStorage, envType);
   const isEmpty = !userOrgInfo;
   const { userName, orgLevel, orgName, orgId } = userOrgInfo || {};
-  console.log("🚀 ~ UserInfo ~ userOrgInfo:", userOrgInfo);
 
   return (
     <div className={classnames(Styles.userInfo, className)} {...rest}>

@@ -3,7 +3,6 @@ const user = {
 };
 
 // const getLocalStorage = () => {
-//   console.log("ss");
 //   return window.localStorage;
 // };
 

@@ -39,6 +39,7 @@ interface DomianListItem {
   updateTime?: number;
   domain: string;
   value: Record<string, any>;
+  cookieValue?: chrome.cookies.Cookie[];
 }
 
 const TIME_FORMAT = "MM-DD HH:mm:ss";
@@ -54,10 +55,15 @@ const LocalStorageSetter = () => {
   const [domainList, setDomainList] = useState<DomianListItem[]>([]);
 
   const currentOptionsRef = useRef<any>({});
-  const { defaultSelectAll = false } = currentOptionsRef.current;
+  const { defaultSelectAll = false, setLocalWithCookie = false } =
+    currentOptionsRef.current;
   // const currentTabRef = useRef<chrome.tabs.Tab | undefined>();
 
-  const { value: curLS = {}, domain } = domainList[selectedDomainIndex] || {};
+  const {
+    value: curLS = {},
+    cookieValue = [],
+    domain,
+  } = domainList[selectedDomainIndex] || {};
 
   const localStorageKeysList = Object.keys(curLS).sort(
     (a: any, b: any) => a - b
@@ -133,30 +139,83 @@ const LocalStorageSetter = () => {
     });
   };
 
+  const getCookieValue = async () => {
+    if (!currentTab?.url) {
+      return [];
+    }
+    const curTabCookie = await chrome.cookies.getAll({
+      url: currentTab?.url || "",
+    });
+    return curTabCookie;
+  };
+
   // 设置当前 localStorage 到 storage
   const setCurrentLSToStorage = async () => {
     if (!currentTab?.id || !currentLocalStorage) return;
+
+    const cookieValue = await getCookieValue();
 
     await updateChromeStorage({
       updateTime: dayjs().valueOf(),
       domain: currentTab?.url || "",
       value: currentLocalStorage,
+      cookieValue,
     });
 
     message.success("操作成功");
     init();
   };
 
+  // 设置cookie到当前标签页
+  const setCookiesToCurrentTab = (cookieValue: chrome.cookies.Cookie[]) => {
+    if (!currentTab?.url) {
+      return [];
+    }
+
+    const setCookiePromise = (cookie: chrome.cookies.Cookie) => {
+      const urlObj = new URL(currentTab?.url || "");
+
+      const cookieDetails = {
+        url: currentTab?.url || "",
+        name: cookie.name,
+        value: cookie.value,
+        domain: urlObj.hostname,
+        path: cookie.path,
+        secure: cookie.secure,
+        httpOnly: cookie.httpOnly,
+        sameSite: cookie.sameSite as chrome.cookies.SameSiteStatus,
+        storeId: cookie.storeId,
+        expirationDate: cookie.expirationDate,
+      };
+      return chrome.cookies.set(cookieDetails);
+    };
+
+    const res = cookieValue.map((item) => setCookiePromise(item));
+
+    return res;
+  };
+
   // 设置 选中的域名localStorage 到 当前页面
   const setTargetLSToCurrentTab = async () => {
     try {
       if (!currentTab?.id) return;
+      const promiseList: Promise<any>[] = [
+        // 设置 localStorage
+        chrome.scripting.executeScript({
+          target: { tabId: currentTab.id as number },
+          func: setLocalStorageFunc,
+          args: [getValueFromObj(selectLSKeys, curLS)] as any,
+        }),
+      ];
 
-      await chrome.scripting.executeScript({
-        target: { tabId: currentTab.id },
-        func: setLocalStorageFunc,
-        args: [getValueFromObj(selectLSKeys, curLS)] as any,
-      });
+      if (setLocalWithCookie) {
+        promiseList.push(
+          // 设置cookie
+          ...setCookiesToCurrentTab(cookieValue)
+        );
+      }
+
+      await Promise.allSettled(promiseList);
 
       message.success("操作成功");
       refresh();
